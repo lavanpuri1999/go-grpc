@@ -1,0 +1,14 @@
+syntax="proto3";
+
+package proto;
+
+option go_package = "src/proto";
+
+message Person {
+  string name = 1;
+  int32 age = 2;
+}
+
+service PersonService {
+  rpc SayHello(Person) returns (Person) {}
+}
