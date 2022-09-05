@@ -23,6 +23,7 @@ const _ = grpc.SupportPackageIsVersion7
 // For semantics around ctx use and closing/ending streaming RPCs, please refer to https://pkg.go.dev/google.golang.org/grpc/?tab=doc#ClientConn.NewStream.
 type PersonServiceClient interface {
 	SayHello(ctx context.Context, in *Person, opts ...grpc.CallOption) (*Person, error)
+	QueryLogFiles(ctx context.Context, in *QueryInput, opts ...grpc.CallOption) (*QueryResults, error)
 }
 
 type personServiceClient struct {
@@ -42,11 +43,21 @@ func (c *personServiceClient) SayHello(ctx context.Context, in *Person, opts ...
 	return out, nil
 }
 
+func (c *personServiceClient) QueryLogFiles(ctx context.Context, in *QueryInput, opts ...grpc.CallOption) (*QueryResults, error) {
+	out := new(QueryResults)
+	err := c.cc.Invoke(ctx, "/proto.PersonService/QueryLogFiles", in, out, opts...)
+	if err != nil {
+		return nil, err
+	}
+	return out, nil
+}
+
 // PersonServiceServer is the server API for PersonService service.
 // All implementations must embed UnimplementedPersonServiceServer
 // for forward compatibility
 type PersonServiceServer interface {
 	SayHello(context.Context, *Person) (*Person, error)
+	QueryLogFiles(context.Context, *QueryInput) (*QueryResults, error)
 	mustEmbedUnimplementedPersonServiceServer()
 }
 
@@ -56,6 +67,9 @@ type UnimplementedPersonServiceServer struct {
 
 func (UnimplementedPersonServiceServer) SayHello(context.Context, *Person) (*Person, error) {
 	return nil, status.Errorf(codes.Unimplemented, "method SayHello not implemented")
+}
+func (UnimplementedPersonServiceServer) QueryLogFiles(context.Context, *QueryInput) (*QueryResults, error) {
+	return nil, status.Errorf(codes.Unimplemented, "method QueryLogFiles not implemented")
 }
 func (UnimplementedPersonServiceServer) mustEmbedUnimplementedPersonServiceServer() {}
 
@@ -88,6 +102,24 @@ func _PersonService_SayHello_Handler(srv interface{}, ctx context.Context, dec f
 	return interceptor(ctx, in, info, handler)
 }
 
+func _PersonService_QueryLogFiles_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
+	in := new(QueryInput)
+	if err := dec(in); err != nil {
+		return nil, err
+	}
+	if interceptor == nil {
+		return srv.(PersonServiceServer).QueryLogFiles(ctx, in)
+	}
+	info := &grpc.UnaryServerInfo{
+		Server:     srv,
+		FullMethod: "/proto.PersonService/QueryLogFiles",
+	}
+	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
+		return srv.(PersonServiceServer).QueryLogFiles(ctx, req.(*QueryInput))
+	}
+	return interceptor(ctx, in, info, handler)
+}
+
 // PersonService_ServiceDesc is the grpc.ServiceDesc for PersonService service.
 // It's only intended for direct use with grpc.RegisterService,
 // and not to be introspected or modified (even as a copy)
@@ -98,6 +130,10 @@ var PersonService_ServiceDesc = grpc.ServiceDesc{
 		{
 			MethodName: "SayHello",
 			Handler:    _PersonService_SayHello_Handler,
+		},
+		{
+			MethodName: "QueryLogFiles",
+			Handler:    _PersonService_QueryLogFiles_Handler,
 		},
 	},
 	Streams:  []grpc.StreamDesc{},

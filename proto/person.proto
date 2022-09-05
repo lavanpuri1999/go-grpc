@@ -9,6 +9,16 @@ message Person {
   int32 age = 2;
 }
 
+message QueryInput {
+  string query = 1;
+}
+
+message QueryResults {
+  repeated string logLines= 1;
+  int32 count = 2;
+}
+
 service PersonService {
   rpc SayHello(Person) returns (Person) {}
+  rpc QueryLogFiles(QueryInput) returns (QueryResults) {}
 }

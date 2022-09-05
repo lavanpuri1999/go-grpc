@@ -2,6 +2,7 @@ package main
 
 import (
 	"context"
+	"fmt"
 	"google.golang.org/grpc"
 	"google.golang.org/grpc/credentials/insecure"
 	"log"
@@ -35,4 +36,6 @@ func main() {
 		log.Printf("User Details: %s, %d\n", r.GetName(), r.GetAge())
 	}
 
+	results, err := c.QueryLogFiles(ctx, &pb.QueryInput{Query: "checking"})
+	fmt.Printf("Response lines %s\n Count: %d", results.LogLines, results.Count)
 }
